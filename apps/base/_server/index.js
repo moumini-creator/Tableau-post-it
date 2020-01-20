@@ -19,16 +19,6 @@ class Base extends ModuleBase {
 	}
 
 	/**
-	 * @param {*} req 
-	 * @param {*} res 
-	 */
-	suscribe(req, res) {
-		if(password_suscribe != password_s){
-			return this.sendJSON(req,res, 404, "Les mots de passes sont pas bon");
-		}
-	}
-
-	/**
 	 * @method data : random data response
 	 * @param {*} req 
 	 * @param {*} res 
@@ -48,14 +38,28 @@ class Base extends ModuleBase {
 	 */
 	_onIOConnect(socket) {
 		super._onIOConnect(socket); // do not remove super call
-		socket.on("dummy", packet => this._onDummyData(socket, packet)); // listen to "dummy" messages
+		socket.on("register", packet => this.suscribe(socket, packet)); // listen to "dummy" messages
 	}
 
+	/*
 	_onDummyData(socket, packet) { // dummy message received
 		trace(socket.id, "dummy", packet); // say it
 		socket.emit("dummy", {message: "dummy indeed", value: Math.random()}); // answer dummy random message
 	}
+	*/
 
+	suscribe(socket, packet) {
+		trace(socket.id, "register", packet); // say it
+		socket.on("register", (packet) => {
+			trace("message" + packet);
+			fs.writeFile('test.txt', packet, (err) => {
+				if(err) throw err;
+				console.log('Saved !');
+			});
+		});
+		socket.emit("return_register", {message: "ok pour moi"}); // answer dummy random message
+		
+	}
 }
 
 module.exports = Base; // export app class
