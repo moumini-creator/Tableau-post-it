@@ -1,8 +1,7 @@
 window.addEventListener("load", event => new Base());
 
-let postID = 1;
-let isDown = false;
-let mouseOffset = {x: 0, y: 0};
+let isDown = false; // Its global for all app hold a bool
+let mouseOffset = { x: 0, y: 0 }; // Define mouseOffset x and y at 0 
 
 class Base {
 
@@ -15,7 +14,7 @@ class Base {
 	async initialize() {
 
 		this.iospace = "baseapp"; // IO namespace for this app
-		this.io = io.connect("http://localhost/user.html" + this.iospace); // connect socket.io
+		this.io = io.connect("http://localhost/" + this.iospace); // connect socket.io
 
 		this.mvc = new MVC("myMVC", this, new MyModel(), new MyView(), new MyController()); // init app MVC
 		await this.mvc.initialize(); // run init async tasks
@@ -24,15 +23,6 @@ class Base {
 
 	}
 
-	/**
-	 * @method test : test server GET fetch
-	 */
-	async test() {
-		console.log("test server hello method");
-		let result = await Comm.get("hello/everyone"); // call server hello method with argument "everyone"
-		console.log("result", result);
-		console.log("response", result.response);
-	}
 }
 
 class MyModel extends Model {
@@ -46,67 +36,43 @@ class MyModel extends Model {
 
 	}
 
-	async post(){
-		trace("get post");
-		let result = await Comm.get("post");
-		console.log(result);
-		return result.response;
-	}
-	
-
 }
 
 class MyView extends View {
 
 	constructor() {
 		super();
-		this.table = null;
 	}
 
 	initialize(mvc) {
 		super.initialize(mvc);
 
 		//name app
-		this.name = document.createElement("div");
-		this.name.innerHTML = "Tableau des memoire"; // Name
+		this.name = document.createElement("div"); // Create div
+		this.name.innerHTML = "Tableau des memoire"; // Add name
 		this.name.classList.add("name"); // Add class css
-		this.stage.appendChild(this.name);
+		this.stage.appendChild(this.name); // Append to body
 
-		this.div_postbut = document.createElement("div"); // Create div for post-it
+		this.div_postbut = document.createElement("div"); // Create div for input & button
 
 		// create post-it form
-		this.postit = document.createElement("input");
-		this.postit.id = "sendMemory";
-		this.postit.classList.add("sendMemory");
-		this.div_postbut.appendChild(this.postit);
+		this.postit = document.createElement("input"); // Create input
+		this.postit.id = "sendMemory"; // Give Id
+		this.postit.classList.add("sendMemory"); // Add class
+		this.div_postbut.appendChild(this.postit); // Append input to main div
 
 		// button submit
-		this.button_submit = document.createElement("button");
-		this.button_submit.innerHTML = "Post-it !";
+		this.button_submit = document.createElement("button"); // Create button
+		this.button_submit.innerHTML = "Ajoutez un titre"; // Add text
 		this.button_submit.classList.add("button_submit"); // Add class css
-		this.div_postbut.appendChild(this.button_submit);
+		this.div_postbut.appendChild(this.button_submit); // Append button to main div
 
-		this.stage.appendChild(this.div_postbut);  // Bind at body or stage
+		this.stage.appendChild(this.div_postbut);  // Apppend button & input at body 
 
-		this.ContainAll = document.createElement("div");
-		this.ContainAll.id = "ContainAll"; // Add class css
-		this.ContainAll.classList.add("column"); // Add class css
-
-		// create span for drag and drop
-		this.DragAndDrop = document.createElement("div");
-		this.DragAndDrop.classList.add("draganddrop");
-		this.DragAndDrop.id = 0;
-		
-		this.div_postit = document.createElement("div"); // Create div for post-it
+		this.div_postit = document.createElement("div"); // Create div for post-it 
 		this.div_postit.classList.add("clearfix", "max_height"); // Add class css
-		this.div_postit.id = "firstPost";
+		this.div_postit.id = "firstPost"; // Add id
 
-		this.postIt = document.createElement("textarea"); // Create a post-it
-		this.postIt.classList.add("post"); // Add class css
-		
-		this.ContainAll.appendChild(this.DragAndDrop);
-		this.ContainAll.appendChild(this.postIt); // Bind at div		
-		this.div_postit.appendChild(this.ContainAll); // Bind at body or stage
 		this.stage.appendChild(this.div_postit); // Bind at body or stage
 	}
 
@@ -126,91 +92,148 @@ class MyView extends View {
 
 	}
 
-	newPost(){
+	/* Newpost use to create and a post-it to the body */
+	newPost(message) {
 
-		let parent = document.getElementById("firstPost");
-		let new_post = document.getElementById("ContainAll");
-		
-		let ContainAllNew = document.createElement("div"); // Create a post-it
-		let DragAndDropNew = document.createElement("div"); // Create a post-it
-		let newPostIt = document.createElement("textarea"); // Create a post-it
-		
+		let parent = document.getElementById("firstPost"); // Use to add a new element at good place
 
-		ContainAllNew.classList.add("column");
-		DragAndDropNew.classList.add("draganddrop");
+		let ContainAll = document.createElement("div"); // Create main container
+		let DragAndDrop = document.createElement("div"); // Create div for drag and drop and title
+		let newPostIt = document.createElement("textarea"); // Create textarea for add text
+		let cross = document.createElement("span"); // Create span for close 
 
-		DragAndDropNew.appendChild(newPostIt);
-		ContainAllNew.appendChild(DragAndDropNew);
-		ContainAllNew.appendChild(newPostIt);
+		/* Add class css */
+		cross.classList.add("cross");
+		ContainAll.classList.add("column"); 
+		DragAndDrop.classList.add("draganddrop");
+		newPostIt.classList.add("post");
 
-		newPostIt.classList.add("post"); // Add class css
-		DragAndDropNew.id = postID++;
-		parent.insertBefore(ContainAllNew, new_post); // Bind at div
-		
+		/* Add message and text */
+		DragAndDrop.innerHTML = message;
+		newPostIt.innerHTML = "Editez moi";
+		cross.innerHTML = "&times;";
+
+		/* Append all element create at DragAndDrop */
+		DragAndDrop.appendChild(cross);
+		DragAndDrop.appendChild(newPostIt);
+		ContainAll.appendChild(DragAndDrop);
+		ContainAll.appendChild(newPostIt);
+
+		/** Prevents the elements from dispersing with each click to drag and drop 
+		 *  /!\ Position absolute is IMPORTANT !
+		*/
+		ContainAll.style.position = "absolute";
+		parent.appendChild(ContainAll); // Append all contain at parent
+
+		this.stage.appendChild(parent); // Parent append to body
+
+		/**
+		 * Cross wait to click for remove
+		 */
+		cross.addEventListener("click", (e) => {
+			this.closePost(e, ContainAll);
+		});
+
+		/**
+		 * Contain wait to mouse down (click left hold) and callback to onMouseDown
+		 */
+		ContainAll.addEventListener("mousedown", (e) => {
+			this.onMouseDown(e, ContainAll);
+		});
+
+		/**
+		 * Contain wait to mouse down (click left hold and move) and callback to onMouseMove
+		 */
+		ContainAll.addEventListener("mousemove", (e) => {
+			this.onMouseMove(e, ContainAll);
+		});
+
+		/**
+		 * Contain wait to mouse up (click left release) and callback to onMouseUp
+		 */
+		ContainAll.addEventListener("mouseup", () => {
+			this.onMouseUp();
+		});
+
 	}
 
-	onMouseDown() {
-		trace("1");
+	/**
+	 * closePost response at addeventlistener Click at cross event
+	 */
+	closePost(e, item) {
+		
+		if (item.parentNode) {
+			item.parentNode.removeChild(item); // Delete the post-it
+		}
+
+	}
+
+	/**
+	 * onMouseDown response at addeventlistener mousedown at ContainAll event
+	 */
+	onMouseDown(e, item) {
+
+		/*
+		* isDown takes true to be able 
+		* to activate the displacement
+		*/
 		isDown = true;
 
-		console.log(event.target.id);
-
+		/*
+		* Calcule the mouse position relation to the element  
+		*/ 
 		mouseOffset = {
-			x : this.stage.offsetLeft - event.clientX, 
-			y : this.stage.offsetTop - event.clientY 
+			x: item.offsetLeft - e.clientX, // Horizontal
+			y: item.offsetTop - e.clientY // Vertical
 		};
-	}
-	
-	onMouseMove() {
-		trace("2");
-		if(isDown){
-			this.div_postit.style.left = event.clientX + mouseOffset.x + "px";
-			this.div_postit.style.top = event.clientY + mouseOffset.Y + "px";
-		}
+
 	}
 
+	/**
+	 * onMouseDown response at addeventlistener mousemove at ContainAll event
+	 */
+	onMouseMove(e, item) {
+		
+		if (isDown) { // isDown have true
+			
+			// Modify margin left/top of element to displace
+			item.style.marginLeft = e.clientX + mouseOffset.x + "px"; 
+			item.style.marginTop = e.clientY + mouseOffset.y - 150 + "px"; // "mouseOffset.y - 150" allows the mouse pointer to click in the right place
+
+		}
+
+	}
+
+	/**
+	 * onMouseDown response at addeventlistener mouseup at ContainAll event
+	 */
 	onMouseUp() {
-		trace("3");
-		isDown = false;
+
+		isDown = false; // isDown takes false to be disable mouse move
+	
 	}
 
 	addListeners() {
 
-		//this.getBtnHandler = e => this.btnClick(e);
-		//this.btn.addEventListener("click", this.getBtnHandler);
-		
+		this.postItSetting = () => this.updateTXT(); // postItSetting call the function 
+		this.button_submit.addEventListener("click", this.postItSetting); // button_submit trigger click
 
-		this.postItSetting = () => this.newPost();
-		this.button_submit.addEventListener("click", this.postItSetting);
-
-		this.down = () => this.onMouseDown();
-		this.div_postit.addEventListener("mousedown", this.down);
-
-		this.move = () => this.onMouseMove();
-		this.div_postit.addEventListener("mousemove", this.move);
-
-		this.up = () => this.onMouseUp();
-		this.div_postit.addEventListener("mouseup", this.up);
 	}
 
 	removeListeners() {
-		
-		this.button_submit.removeEventListener("click", this.postItSetting);
-	
-	}
 
-	btnSClick() {
-	
-		this.mvc.controller.btnSWasClicked("post"); // dispatch
-	
+		this.button_submit.removeEventListener("click", this.postItSetting); // remove listener
+
 	}
 
 	updateTXT() {
 
 		var message = document.getElementById("sendMemory"); // take id 
-		this.postIt.innerHTML = message.value.toString(); // take a message and print
-		message.value = "";
+		this.newPost(message.value.toString()); // take message et give it to newPost()
+		message.value = ""; // replace by empty
+
 	}
+
 }
 
 class MyController extends Controller {
@@ -223,13 +246,6 @@ class MyController extends Controller {
 
 		super.initialize(mvc);
 
-	}
-
-	async btnSWasClicked(params) {
-
-		trace("btn submit click", params);
-		this.mvc.view.updateTXT(await this.mvc.model.post()); // wait async request > response from server and update view post it value
-	
 	}
 
 }
