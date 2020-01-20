@@ -11,7 +11,7 @@ run it :
 
 test it :
 
-	- navigate to http://localhost/hello/everyone
+	- navigate to http://localhost/
 
 understand it :
 
@@ -38,6 +38,7 @@ understand it :
 			- index.html : basic index file
 			- css/style.css : main stylesheet file
 			- js/main.js : app entry point
+			- js/user.js : app entry point
 			- js/utils/comm.js : wrappers for fetch API to exec async GET/POST requests to server
 			- js/utils/merge.js : deep merge object util
 			- js/utils/mvc.js : MVC utils
