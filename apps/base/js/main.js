@@ -126,7 +126,11 @@ class MyView extends View {
 		parent.appendChild(ContainAll); // Append all contain at parent
 
 		this.stage.appendChild(parent); // Parent append to body
-
+		
+		/**
+		 * I decide to put addEventListener here, it's easier to work with
+		 */
+		
 		/**
 		 * Cross wait to click for remove
 		 */
